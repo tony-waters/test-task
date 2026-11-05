@@ -1,0 +1,120 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "deny": [
+      "Bash(git push:*)"
+    ],
+    "ask": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/application-prod.*)",
+      "Read(./**/application-prd.*)",
+      "Read(./**/application-production.*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*.jks)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.keystore)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(git:*)"
+    ],
+    "allow": [
+      "Bash(git commit:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(docker:*)",
+      "Bash(kubectl:*)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(./mvnw verify:*)",
+      "Bash(./mvnw spotless:apply)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(rg:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-paths.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-content.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-bash.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-java.sh",
+            "timeout": 60,
+            "statusMessage": "Formatting Java"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/codacy-analyze.sh",
+            "timeout": 120,
+            "statusMessage": "Running Codacy analysis"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-guards.sh",
+            "timeout": 60,
+            "statusMessage": "Verifying guard hooks"
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-tests.sh",
+            "timeout": 300,
+            "statusMessage": "Running tests"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-context.sh",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
