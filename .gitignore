@@ -38,3 +38,7 @@ build/
 ### task ###
 AI_TASK.md
 dump.sql
+
+### Claude Code hook state ###
+.claude/.guard-state
+.claude/.verify-state

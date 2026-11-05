@@ -188,7 +188,7 @@ deny_content  "$(bash_json $'cat > notes.txt <<EOF\nacme widgets\nEOF')"        
 allow_content "$(write_json Write "$project/src/A.java" 'class A { /* zorb lax */ }')"      "near-miss is fine"
 allow_content "$(write_json Write "$project/src/main/resources/db/migration/V1__schema.sql" 'CREATE TABLE patient (id uuid);')" "ordinary migration"
 allow_content "$(write_json Write "/tmp/elsewhere/notes.txt" 'zorblax')"                    "outside the project"
-allow_content "$(write_json Write "$project/data/notes.txt" 'zorblax')"                     "git-ignored path: content not checked"
+allow_content "$(write_json Write "$project/target/notes.txt" 'zorblax')"                     "git-ignored path: content not checked"
 allow_content "$(bash_json './mvnw test')"                                                  "ordinary command"
 
 export FORBIDDEN_NAMES_FILE=$fake_names.missing

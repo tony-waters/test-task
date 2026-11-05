@@ -1,3 +1,17 @@
+
+# Create a Spec
+
+A spec is useful if I want to create tickets - which is itself useful when controlling agent context (i.e. can /clear context after each ticket.)
+
+I used /mattpocock-skills:grill-with-docs to create it.
+
+The spec is in ticket form https://github.com/tony-waters/test-task/issues/1
+
+Next step is to creat tickets from the spec and start on them.
+
+
+---
+
 # Initial Thoughts
 
 ## guardrails
