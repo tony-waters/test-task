@@ -19,6 +19,11 @@ App should be available at:
 
 # NOTES:
 
+# Ticket #5?
+
+- ran a /security-review on the whole repo first, should probably have done this per commit
+- ran /mattpocock-skills:imporve-codebase-architecture - not been so keen on the structure, but its functional. would like to maybe be more explicit with packages, for example, theres no explicit 'domain'. Want to see what that skill picks up before moving on, then make a judgement call on the next 45 minutes
+
 # Completed ticket #4
 
 https://github.com/tony-waters/test-task/issues/4
