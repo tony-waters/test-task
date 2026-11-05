@@ -1,4 +1,34 @@
 
+
+## How to run the app
+
+To run
+
+> DUMP_FILE=$PED/dump.sql docker compose up --build
+
+App should be available at:
+ 
+> http://localhost:8080
+
+---
+
+# NOTES:
+
+# Completed ticket #2
+
+https://github.com/tony-waters/test-task/issues/2
+
+Once Claude had finished did /codex:review since this nearly always finds some issues.
+
+Looked over code and tests.
+- Noticed there was no PatientRepository class, which I expected to see - looks like it will be added by ticket #3 - so waiting until then.
+- A malformed date ended up in the logs, so fixed that as its a security issue
+- Claude wanted to add indexes to DB straight away - told it to hold off
+- Duplicate UUIDs cause the dump to fail - fixed
+- Search terms travel in the URL - could contain names, nhs numbers, etc. - left for now
+- Claude did not get the docker image to work, so I tried it locally - looked like it may have been to do with my VPN, so switched that off while I complete this task. - that helped it complete, but still failed (looks like its looking for dump.sql in the wrong place), threw it back to Claud to fix now its running
+- Context is feeling sluggish, starting to think i should have broken this ticket into 2. - going to commit this and clear context before next ticket.
+
 # Create tickets
 
 Created 4 tickets:
@@ -16,6 +46,8 @@ Going to clear the session now and start work on the first actual ticket,
 A spec is useful if I want to create tickets - which is itself useful when controlling agent context (i.e. can /clear context after each ticket.)
 
 I used /mattpocock-skills:grill-with-docs to create it.
+
+The grilling process is shown in GRILLING.md if interested.
 
 The spec is in ticket form https://github.com/tony-waters/test-task/issues/1
 

@@ -17,6 +17,10 @@ Hand-off notes for future agent sessions. This file is about current state and g
   - Uncommitted: `CLAUDE.md`, `GLOSSARY.md`, `GRILLING.md`, `NOTES.md`, `docs/`, `mvnw*`, `.mvn/`, plus edits to `.gitignore` and `.claude/hooks/test-guards.sh`.
   - Issue #1 links to `GLOSSARY.md` and `docs/adr/`, which don't resolve on GitHub until those files are pushed.
 
+## Carried into ticket #3
+
+- Add `PatientRepository extends JpaRepository<Patient, Long>` with `findByUuid`. Move the dynamic list JPQL out of `PatientListService` into a custom fragment (`PatientSearch` / `PatientSearchImpl`). Keep it JPQL and two statements per page; no Specifications. The loader stays on `JdbcTemplate` (the upsert needs `on conflict`), and its Javadoc should say why. User agreed 2026-11-05.
+
 ## Rules that are easy to break
 
 - **The user writes `README.md`.** Never write or edit it, and never draft its prose. You may point out facts worth including.

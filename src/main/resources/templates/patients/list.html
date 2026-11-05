@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patients</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<header class="bar">
+  <strong>Patient engagement</strong>
+  <nav><a th:href="@{/patients}">Patients</a></nav>
+</header>
+
+<main>
+  <h1>Patients</h1>
+
+  <div class="errors" th:if="${errors}" role="alert">
+    <p>Some of the request was not valid, so the default list is shown.</p>
+    <ul>
+      <li th:each="e : ${errors}"><code th:text="${e.parameter()}">param</code> <span th:text="${e.message()}">message</span></li>
+    </ul>
+  </div>
+
+  <form class="filters" method="get" th:action="@{/patients}" th:with="q=${view.query()}">
+    <label class="search">Search
+      <input type="search" name="q" th:value="${q.search()}" placeholder="Name, NHS number or hospital ID">
+    </label>
+
+    <fieldset>
+      <legend>Status</legend>
+      <label th:each="s : ${statuses}">
+        <input type="checkbox" name="status" th:value="${s.name()}" th:checked="${q.statuses().contains(s)}">
+        <span th:text="${@fmt.label(s)}">Invited</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Module</legend>
+      <label th:each="m : ${modules}">
+        <input type="checkbox" name="module" th:value="${m.name()}" th:checked="${q.modules().contains(m)}">
+        <span th:text="${@fmt.label(m)}">Diary</span>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Invited (London dates)</legend>
+      <label>From <input type="date" name="from" th:value="${q.invitedFrom()}"></label>
+      <label>To <input type="date" name="to" th:value="${q.invitedTo()}"></label>
+    </fieldset>
+
+    <label>Per page
+      <select name="size">
+        <option th:each="n : ${pageSizes}" th:value="${n}" th:text="${n}" th:selected="${n == q.size()}">25</option>
+      </select>
+    </label>
+
+    <input type="hidden" name="sort" th:value="${q.sort().param()}">
+    <input type="hidden" name="dir" th:value="${q.direction().param()}">
+
+    <div class="actions">
+      <button type="submit">Apply</button>
+      <a th:href="@{/patients}">Clear</a>
+    </div>
+  </form>
+
+  <p class="summary">
+    <span th:text="${view.result().totalElements()}">100</span> patients
+    <span th:if="${view.result().totalPages() > 0}">
+      · page <span th:text="${view.result().page() + 1}">1</span> of <span th:text="${view.result().totalPages()}">4</span>
+    </span>
+  </p>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+    <tr>
+      <th th:replace="~{:: sortable('familyName', 'Family name')}"></th>
+      <th th:replace="~{:: sortable('givenName', 'Given name')}"></th>
+      <th>NHS number</th>
+      <th>Hospital ID</th>
+      <th th:replace="~{:: sortable('status', 'Status')}"></th>
+      <th th:replace="~{:: sortable('age', 'Age')}"></th>
+      <th>Gender</th>
+      <th th:replace="~{:: sortable('invitedAt', 'Invited')}"></th>
+      <th th:replace="~{:: sortable('lastActionAt', 'Last Action')}"></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="p : ${view.result().content()}">
+      <td th:text="${p.familyName()}">Family</td>
+      <td th:text="${p.givenName()}">Given</td>
+      <td th:text="${p.nhsNumber()}">9990000000</td>
+      <td th:text="${p.hospitalId()}">ABC000000</td>
+      <td><span class="status" th:classappend="${p.status().name().toLowerCase()}" th:text="${@fmt.label(p.status())}">Registered</span></td>
+      <td th:text="${@fmt.age(p.age())}" th:classappend="${p.age() == null} ? 'unknown'">40</td>
+      <td th:text="${@fmt.gender(p.gender())}" th:classappend="${p.gender() == null} ? 'unknown'">Female</td>
+      <td th:text="${@fmt.date(p.invitedAt())}">1 Jan 2025</td>
+      <td th:text="${p.lastActionAt() == null} ? 'None' : ${@fmt.dateTime(p.lastActionAt())}"
+          th:classappend="${p.lastActionAt() == null} ? 'unknown'">1 Jan 2025, 09:00</td>
+    </tr>
+    <tr th:if="${view.result().content().isEmpty()}">
+      <td colspan="9" class="empty">No patients match.</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <nav class="pager" th:if="${view.result().totalPages() > 1}" aria-label="Pages">
+    <a th:if="${view.hasPrevious()}" th:href="${view.pageUrl(view.result().page() - 1)}">Previous</a>
+    <th:block th:each="n : ${view.pageNumbers()}">
+      <a th:href="${view.pageUrl(n)}" th:text="${n + 1}"
+         th:classappend="${n == view.result().page()} ? 'current'"
+         th:attr="aria-current=${n == view.result().page()} ? 'page' : null">1</a>
+    </th:block>
+    <a th:if="${view.hasNext()}" th:href="${view.pageUrl(view.result().page() + 1)}">Next</a>
+  </nav>
+
+  <p class="api">Same list as JSON: <a th:href="@{/api/patients}">/api/patients</a> ·
+    <a th:href="@{/swagger-ui.html}">API docs</a></p>
+</main>
+
+<th:block th:remove="all">
+  <th th:fragment="sortable(column, label)" th:with="state=${view.sortState(column)}"
+      th:attr="aria-sort=${state == 'asc'} ? 'ascending' : (${state == 'desc'} ? 'descending' : null)">
+    <a th:href="${view.sortUrl(column)}" th:text="${label} + (${state == 'asc'} ? ' ▲' : (${state == 'desc'} ? ' ▼' : ''))">Label</a>
+  </th>
+</th:block>
+</body>
+</html>

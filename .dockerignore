@@ -1,0 +1,9 @@
+# Never send the brief or the dump into an image build.
+AI_TASK.md
+dump.sql
+*.sql
+!src/**/*.sql
+target
+.git
+.idea
+.claude

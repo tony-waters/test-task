@@ -1,0 +1,33 @@
+:root {
+  --bg: #fafaf9; --fg: #1c1917; --muted: #78716c; --line: #e7e5e4; --accent: #0f766e;
+  --invited: #a16207; --registered: #0369a1; --discharged: #57534e; --error: #b91c1c;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); }
+.bar { display: flex; gap: 2rem; align-items: center; padding: .75rem 1rem; background: var(--accent); color: #fff; }
+.bar a { color: #fff; }
+main { padding: 1rem; max-width: 80rem; margin: 0 auto; }
+h1 { margin: .5rem 0 1rem; font-size: 1.5rem; }
+a { color: var(--accent); }
+.filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; padding: 1rem; border: 1px solid var(--line); background: #fff; }
+.filters fieldset { border: 1px solid var(--line); padding: .25rem .75rem .5rem; margin: 0; }
+.filters label { display: inline-flex; gap: .25rem; align-items: center; margin-right: .5rem; }
+.filters .search { flex-direction: column; align-items: flex-start; }
+.filters .search input { width: 18rem; max-width: 100%; }
+.filters .actions { display: flex; gap: .75rem; align-items: center; }
+.summary { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+.table-wrap { overflow-x: auto; }
+th, td { text-align: left; padding: .4rem .6rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th a { text-decoration: none; color: inherit; }
+td.unknown { color: var(--muted); font-style: italic; }
+td.empty { text-align: center; color: var(--muted); padding: 2rem; }
+.status { padding: .1rem .5rem; border-radius: 1rem; font-size: .85rem; color: #fff; }
+.status.invited { background: var(--invited); }
+.status.registered { background: var(--registered); }
+.status.discharged { background: var(--discharged); }
+.pager { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0; }
+.pager a { padding: .2rem .5rem; border: 1px solid var(--line); text-decoration: none; }
+.pager a.current { background: var(--accent); color: #fff; }
+.errors { border: 1px solid var(--error); color: var(--error); padding: .5rem 1rem; margin-bottom: 1rem; background: #fff; }
+.api { color: var(--muted); margin-top: 2rem; }

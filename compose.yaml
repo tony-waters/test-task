@@ -1,0 +1,60 @@
+# docker compose up
+#
+# Starts PostgreSQL 18, runs the loader once against the dump, then starts the app
+# on http://localhost:8080.
+#
+# The dump stays outside the repository. By default it is read from ../dump.sql;
+# point DUMP_FILE at it to use another path:
+#   DUMP_FILE=/path/to/dump.sql docker compose up
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: engagement
+      POSTGRES_USER: engagement
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-engagement}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U engagement -d engagement"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  loader:
+    image: patient-engagement:local
+    build: .
+    command: ["--app.load.file=/data/dump.sql"]
+    environment: &app-env
+      DB_URL: jdbc:postgresql://db:5432/engagement
+      DB_USER: engagement
+      DB_PASSWORD: ${DB_PASSWORD:-engagement}
+    volumes:
+      - type: bind
+        source: ${DUMP_FILE:-../dump.sql}
+        target: /data/dump.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    # Same image as the loader, which builds it. Building it twice in parallel
+    # made the dependency download flaky.
+    image: patient-engagement:local
+    pull_policy: never
+    environment: *app-env
+    ports:
+      - "8080:8080"
+    depends_on:
+      loader:
+        condition: service_completed_successfully
+
+volumes:
+  db-data:
