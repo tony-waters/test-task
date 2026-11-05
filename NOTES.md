@@ -7,19 +7,20 @@ Hand-off notes for future agent sessions. This file is about current state and g
 - **Design**: done. `GRILLING.md` holds the 38 settled decisions (Q1–Q38), with answers.
 - **Spec**: GitHub issue #1.
 - **Tickets**: sub-issues of #1, all labelled `ready-for-agent`. GitHub's dependency feature records the blocking links.
-  - #2 Load the data and browse Patients. Unblocked; **start here**.
-  - #3 Patient detail and timeline (blocked by #2)
+  - #2 Load the data and browse Patients. **Closed 2026-11-05.** Problems found while building it are in `PROBLEMS.md`.
+  - #3 Patient detail and timeline. **Built 2026-11-05, not yet closed.** The user reviews and closes it. Its findings are PROBLEMS.md #12 to #16.
   - #4 Dashboard (blocked by #2)
   - #5 Roles, CSV export and operability (blocked by #2; best done after #3 and #4)
 - **Not ticketed on purpose**: the 100× volume generator, query plans and indexes (spec §11). They sit at the cut line. Search indexing (`pg_trgm`) is also deferred to that work.
-- **Code**: none yet. Only an empty `pom.xml` (groupId `uk.bit1`) and the Maven wrapper.
+- **Code**: tickets #2 and #3 (schema, loader, patient list, patient detail with Engagement summary and keyset timeline, UI + API, Compose). Run with `DUMP_FILE=$PWD/dump.sql docker compose up --build`; `DUMP_FILE` defaults to `../dump.sql`.
 - **Git**: nothing from these sessions is committed. The user commits; don't commit unless asked.
   - Uncommitted: `CLAUDE.md`, `GLOSSARY.md`, `GRILLING.md`, `NOTES.md`, `docs/`, `mvnw*`, `.mvn/`, plus edits to `.gitignore` and `.claude/hooks/test-guards.sh`.
   - Issue #1 links to `GLOSSARY.md` and `docs/adr/`, which don't resolve on GitHub until those files are pushed.
 
-## Carried into ticket #3
+## Decided in ticket #3
 
-- Add `PatientRepository extends JpaRepository<Patient, Long>` with `findByUuid`. Move the dynamic list JPQL out of `PatientListService` into a custom fragment (`PatientSearch` / `PatientSearchImpl`). Keep it JPQL and two statements per page; no Specifications. The loader stays on `JdbcTemplate` (the upsert needs `on conflict`), and its Javadoc should say why. User agreed 2026-11-05.
+- **Suspect timestamp rule** (user, 2026-11-05): recorded at, or within 1 s before, the moment extraction *began*, which is the earliest `source_created_at` in either table. That flags 47 on the dump. It is not each row's own `entity_created`, and not the latest one, which would flag 17. The code is `action.SuspectTimestamps`.
+- The PatientRepository / `PatientSearch` fragment refactor carried over from #2 is done. `PatientListService` is gone, and `PatientService` is the shared service.
 
 ## Rules that are easy to break
 
@@ -42,5 +43,6 @@ Hand-off notes for future agent sessions. This file is about current state and g
 - The user's original notes (in `README.md`) say patient 42 has 238 post-discharge Actions. **That is wrong.** Patient 42 has zero Actions and is the one *skipped registration* case. The 238 post-discharge Actions are spread across 12 of the 17 discharged patients. The user knows; don't re-raise it, but don't repeat the error either.
 - On the supplied data, expected test figures are:
   - Current-status buckets: Invited 3, Registered 80, Discharged 17.
+  - Suspect-timestamp Actions 47 (3 Patients), post-discharge Actions 238, skipped registration 1.
   - Strict funnel: 100 → 96 → 16.
 - The full profile is under "Facts gathered before Round 1" in `GRILLING.md`.

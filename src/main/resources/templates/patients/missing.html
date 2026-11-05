@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Patient not found</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body>
+<header class="bar">
+  <strong>Patient engagement</strong>
+  <nav><a th:href="@{/patients}">Patients</a></nav>
+</header>
+<main>
+  <h1>Patient not found</h1>
+  <p th:text="${message}">No patient has that ID.</p>
+  <p><a th:href="@{/patients}">Back to all patients</a></p>
+</main>
+</body>
+</html>

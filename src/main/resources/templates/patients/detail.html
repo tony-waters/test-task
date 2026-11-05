@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${patient.givenName()} + ' ' + ${patient.familyName()} + ' · Patient'">Patient</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body th:with="e=${patient.engagement()}">
+<header class="bar">
+  <strong>Patient engagement</strong>
+  <nav><a th:href="@{/patients}">Patients</a></nav>
+</header>
+
+<main>
+  <p class="crumbs"><a th:href="@{/patients}">← All patients</a></p>
+
+  <h1>
+    <span th:text="${patient.title()}" th:if="${patient.title()}">Mx.</span>
+    <span th:text="${patient.givenName()}">Given</span>
+    <span th:text="${patient.familyName()}">Family</span>
+    <span class="status" th:classappend="${patient.status().name().toLowerCase()}"
+          th:text="${@fmt.label(patient.status())}">Registered</span>
+  </h1>
+
+  <div class="errors" th:if="${errors}" role="alert">
+    <p>Some of the request was not valid, so the newest Actions are shown.</p>
+    <ul>
+      <li th:each="err : ${errors}"><code th:text="${err.parameter()}">param</code> <span th:text="${err.message()}">message</span></li>
+    </ul>
+  </div>
+
+  <ul class="flags" th:unless="${flags.isEmpty()}" aria-label="Data-quality flags">
+    <li th:if="${flags.contains('SKIPPED_REGISTRATION')}">
+      <strong>Skipped registration</strong>: discharged without ever registering.
+    </li>
+    <li th:if="${flags.contains('SUSPECT_TIMESTAMPS')}">
+      <strong>Suspect timestamps</strong>: some Actions were recorded at the moment the data was
+      extracted. They are kept, counted and marked below.
+    </li>
+  </ul>
+
+  <section class="facts">
+    <dl>
+      <dt>Age</dt>
+      <dd th:text="${@fmt.age(patient.age())}" th:classappend="${patient.age() == null} ? 'unknown'">40</dd>
+      <dt>Date of birth</dt>
+      <dd th:text="${patient.dateOfBirth() == null} ? 'Unknown' : ${@fmt.day(patient.dateOfBirth())}"
+          th:classappend="${patient.dateOfBirth() == null} ? 'unknown'">1 Jan 1980</dd>
+      <dt>Gender</dt>
+      <dd th:text="${@fmt.gender(patient.gender())}" th:classappend="${patient.gender() == null} ? 'unknown'">Female</dd>
+      <dt>NHS number</dt>
+      <dd th:text="${patient.nhsNumber() ?: 'Not recorded'}" th:classappend="${patient.nhsNumber() == null} ? 'unknown'">9990000000</dd>
+      <dt>Hospital ID</dt>
+      <dd th:text="${patient.hospitalId() ?: 'Not recorded'}" th:classappend="${patient.hospitalId() == null} ? 'unknown'">ABC000000</dd>
+    </dl>
+    <dl>
+      <dt>Invited</dt>
+      <dd th:text="${@fmt.dateTime(patient.invitedAt())}">1 Jan 2025, 09:00</dd>
+      <dt>Registered</dt>
+      <dd th:text="${patient.registeredAt() == null} ? 'Not registered' : ${@fmt.dateTime(patient.registeredAt())}"
+          th:classappend="${patient.registeredAt() == null} ? 'unknown'">2 Jan 2025, 09:00</dd>
+      <dt>Discharged</dt>
+      <dd th:text="${patient.dischargedAt() == null} ? 'Not discharged' : ${@fmt.dateTime(patient.dischargedAt())}"
+          th:classappend="${patient.dischargedAt() == null} ? 'unknown'">1 Jun 2025, 09:00</dd>
+      <dt>Actions</dt>
+      <dd th:text="${e.total()}">12</dd>
+    </dl>
+  </section>
+
+  <h2>Engagement summary</h2>
+  <p class="summary" th:if="${e.total() == 0}">No Actions recorded.</p>
+  <div class="table-wrap" th:unless="${e.total() == 0}">
+  <table class="engagement">
+    <thead>
+    <tr>
+      <th>Module / Topic</th>
+      <th class="num">Total</th>
+      <th class="num" th:each="t : ${actionTypes}" th:text="${@fmt.actionType(t)}">Started</th>
+      <th>First</th>
+      <th>Last</th>
+    </tr>
+    </thead>
+    <tbody th:each="m : ${e.modules()}">
+    <tr class="module">
+      <th scope="row" th:text="${@fmt.label(m.module())}">Programme</th>
+      <td class="num" th:text="${m.total()}">10</td>
+      <td class="num" th:each="t : ${actionTypes}" th:text="${m.countsByActionType().getOrDefault(t, 0)}">0</td>
+      <td th:text="${@fmt.dateTime(m.firstActionAt())}">1 Jan 2025, 09:00</td>
+      <td th:text="${@fmt.dateTime(m.lastActionAt())}">1 Jun 2025, 09:00</td>
+    </tr>
+    <tr class="topic" th:each="tp : ${m.topics()}">
+      <th scope="row" th:text="${tp.topic()}">FATIGUE</th>
+      <td class="num" th:text="${tp.total()}">10</td>
+      <td class="num" th:each="t : ${actionTypes}" th:text="${tp.countsByActionType().getOrDefault(t, 0)}">0</td>
+      <td th:text="${@fmt.dateTime(tp.firstActionAt())}">1 Jan 2025, 09:00</td>
+      <td th:text="${@fmt.dateTime(tp.lastActionAt())}">1 Jun 2025, 09:00</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="timeline">Timeline</h2>
+  <p class="summary">Newest first, <span th:text="${timeline.size()}">50</span> per page. Times are UK time (Europe/London).</p>
+  <div class="table-wrap">
+  <table class="timeline">
+    <thead>
+    <tr>
+      <th>Recorded</th>
+      <th>Module</th>
+      <th>Topic</th>
+      <th>Action</th>
+      <th>Notes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="a : ${timeline.content()}"
+        th:classappend="${a.postDischarge()} ? 'post-discharge'">
+      <td th:text="${@fmt.seconds(a.recordedAt())}">1 Jan 2025, 09:00:00</td>
+      <td th:text="${@fmt.label(a.module())}">Programme</td>
+      <td th:text="${a.topic()}">FATIGUE</td>
+      <td th:text="${@fmt.actionType(a.actionType())}">Started</td>
+      <td>
+        <span class="mark after" th:if="${a.postDischarge()}">After discharge</span>
+        <span class="mark suspect" th:if="${a.suspectTimestamp()}">Suspect timestamp</span>
+      </td>
+    </tr>
+    <tr th:if="${timeline.content().isEmpty()}">
+      <td colspan="5" class="empty">No Actions.</td>
+    </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <nav class="pager" aria-label="Timeline pages" th:if="${!firstPage or timeline.nextCursor() != null}">
+    <a th:unless="${firstPage}" th:href="@{/patients/{id}(id=${patient.id()})} + '#timeline'">Newest</a>
+    <a th:if="${timeline.nextCursor() != null}"
+       th:href="@{/patients/{id}(id=${patient.id()},cursor=${timeline.nextCursor()})} + '#timeline'">Older</a>
+  </nav>
+
+  <p class="api">Same data as JSON:
+    <a th:href="@{/api/patients/{id}(id=${patient.id()})}">detail</a> ·
+    <a th:href="@{/api/patients/{id}/actions(id=${patient.id()})}">actions</a></p>
+</main>
+</body>
+</html>

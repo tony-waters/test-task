@@ -18,7 +18,7 @@ import uk.bit1.engagement.support.StandardData;
 @IntegrationTest
 class PatientListStatementCountTest {
 
-  @Autowired PatientListService service;
+  @Autowired PatientService service;
   @Autowired EntityManagerFactory emf;
   @Autowired DumpLoader loader;
 

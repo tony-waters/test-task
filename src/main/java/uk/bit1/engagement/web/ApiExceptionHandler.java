@@ -23,4 +23,11 @@ class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     problem.setProperty("errors", e.getErrors());
     return problem;
   }
+
+  @ExceptionHandler(NotFoundException.class)
+  ProblemDetail notFound(NotFoundException e) {
+    ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+    problem.setTitle("Not found");
+    return problem;
+  }
 }

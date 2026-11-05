@@ -3,18 +3,20 @@ package uk.bit1.engagement.patient;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import uk.bit1.engagement.action.TimelinePage;
 
 @RestController
 @RequestMapping("/api/patients")
 class PatientApiController {
 
-  private final PatientListService patients;
+  private final PatientService patients;
 
-  PatientApiController(PatientListService patients) {
+  PatientApiController(PatientService patients) {
     this.patients = patients;
   }
 
@@ -47,5 +49,23 @@ class PatientApiController {
       @Parameter(description = "10, 25, 50 or 100. Default 25.") @RequestParam(required = false)
           String size) {
     return patients.find(PatientListQuery.parse(q, status, module, from, to, sort, dir, page, size));
+  }
+
+  @Operation(
+      summary = "One Patient: Status, age, identifiers, data-quality flags and Engagement summary")
+  @GetMapping("/{uuid}")
+  PatientDetail detail(@Parameter(description = "The Patient's UUID") @PathVariable String uuid) {
+    return patients.detail(PatientRequest.parse(uuid, null).id());
+  }
+
+  @Operation(summary = "A Patient's Actions, newest first, 50 per page")
+  @GetMapping("/{uuid}/actions")
+  TimelinePage actions(
+      @Parameter(description = "The Patient's UUID") @PathVariable String uuid,
+      @Parameter(description = "The nextCursor of the previous page. Omit for the newest page.")
+          @RequestParam(required = false)
+          String cursor) {
+    PatientRequest request = PatientRequest.parse(uuid, cursor);
+    return patients.timeline(request.id(), request.cursor());
   }
 }

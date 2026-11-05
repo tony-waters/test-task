@@ -11,17 +11,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import uk.bit1.engagement.London;
 
 /**
  * Searches, filters, sorts and pages the patient list in the database. A page costs two
  * statements, the rows and the count, whatever its size.
+ *
+ * <p>Dynamic JPQL rather than Specifications: the projection carries a correlated subquery for the
+ * last Action time, which the sort can use, and the statement count stays fixed.
  */
-@Service
-@Transactional(readOnly = true)
-public class PatientListService {
+class PatientSearchImpl implements PatientSearch {
 
   /** The JPQL projection: one row per Patient, with the time of their latest Action. */
   private static final String SELECT =
@@ -35,12 +34,13 @@ public class PatientListService {
   private final EntityManager em;
   private final Clock clock;
 
-  public PatientListService(EntityManager em, Clock clock) {
+  PatientSearchImpl(EntityManager em, Clock clock) {
     this.em = em;
     this.clock = clock;
   }
 
-  public PatientPage find(PatientListQuery query) {
+  @Override
+  public PatientPage search(PatientListQuery query) {
     Map<String, Object> params = new HashMap<>();
     String where = where(query, params);
 

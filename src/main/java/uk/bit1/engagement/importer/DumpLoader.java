@@ -28,7 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
  *   <li>The dump's {@code entity_id} is used only to resolve each Action's Patient.
  * </ul>
  *
- * Only counts are logged, never row contents.
+ * <p>It writes through {@code JdbcTemplate}, not the JPA repositories: the upsert needs {@code
+ * insert ... on conflict}, a staging table and {@code xmax} to count what changed, none of which
+ * JPA can express.
+ *
+ * <p>Only counts are logged, never row contents.
  */
 @Service
 public class DumpLoader {

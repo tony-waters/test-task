@@ -28,7 +28,8 @@ public final class StandardData {
   public static TestDump build() {
     TestDump dump = new TestDump();
 
-    // Registered, with a Diary Action. Newest Invitation of the named five apart from Eve.
+    // Registered, with two Diary Actions: the earlier one has an Action type outside the known six.
+    // Newest Invitation of the named five apart from Eve.
     PatientRow ada = dump.patient("Ada", "Testwell", "2025-03-01 10:00:00");
     ada.uuid = ADA;
     ada.gender = "FEMALE";
@@ -37,6 +38,7 @@ public final class StandardData {
     ada.hospitalId = "HOS000001";
     ada.registered = "2025-03-05 09:00:00";
     dump.action(ada, "2025-04-01 08:00:00", "DIARY", "BLADDER", "STARTED");
+    dump.action(ada, "2025-03-20 08:00:00", "DIARY", "BLADDER", "PAUSED");
 
     // Invited only, nothing known: no date of birth, gender or NHS number, no Actions.
     PatientRow bert = dump.patient("Bert", "Sample", "2025-04-10 10:00:00");

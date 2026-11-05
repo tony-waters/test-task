@@ -88,7 +88,7 @@
     </thead>
     <tbody>
     <tr th:each="p : ${view.result().content()}">
-      <td th:text="${p.familyName()}">Family</td>
+      <td><a th:href="@{/patients/{id}(id=${p.id()})}" th:text="${p.familyName()}">Family</a></td>
       <td th:text="${p.givenName()}">Given</td>
       <td th:text="${p.nhsNumber()}">9990000000</td>
       <td th:text="${p.hospitalId()}">ABC000000</td>

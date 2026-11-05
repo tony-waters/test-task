@@ -49,7 +49,7 @@ _Avoid_: Context, activity, instrument
 An Action recorded after the Patient's Discharge. It is legitimate, and it is counted like any other.
 
 **Suspect timestamp**:
-An Action whose recorded time is at or after the moment the data was extracted. It is kept, and it is flagged as a data-quality concern.
+An Action recorded at, or within one second before, the moment extraction of the data began. It is kept and counted, and it is flagged as a data-quality concern.
 
 ## Measures
 
