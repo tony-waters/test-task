@@ -10,8 +10,9 @@ Hand-off notes for future agent sessions. This file is about current state and g
   - #2 Load the data and browse Patients. **Closed 2026-11-05.** Problems found while building it are in `PROBLEMS.md`.
   - #3 Patient detail and timeline. **Closed 2026-11-05** (commit b3b3e7a). Its findings are PROBLEMS.md #12 to #16.
   - #4 Dashboard. **Closed 2026-11-05** (commit e9d110e). Its findings are PROBLEMS.md #17 to #19.
-  - #5 Roles, CSV export and operability. **Built 2026-11-05, not yet closed.** The user reviews and closes it. Its findings are PROBLEMS.md #20 to #23, plus updates to #7 and #8.
-- **Not ticketed on purpose**: the 100× volume generator, query plans and indexes (spec §11). They sit at the cut line. Search indexing (`pg_trgm`) is also deferred to that work.
+  - #5 Roles, CSV export and operability. **Closed 2026-11-05**, before being committed. Its findings are PROBLEMS.md #20 to #23, plus updates to #7 and #8.
+  - #6 Volume: 100× generator, query plans and indexes (spec §11, the cut line). Created 2026-11-05, `ready-for-agent`, not blocked. It also carries the `pg_trgm` decision, the suspect-timestamp threshold scans, and the export's connection hold (PROBLEMS.md #3, #4, #13, #14, #17, #18, #20).
+  - #7 Hardening. Created 2026-11-05, `ready-for-agent`, not blocked. Covers PROBLEMS.md #6, #7, #8, #11, #15 and #22: Compose DB port and default passwords, search terms in URLs (needs a decision against GRILLING Q19/Q21), unmatched-path log redaction, the timeline cursor's internal id, duplicate UUIDs in a dump, and an opt-in test against the real dump.
 - **Code**: tickets #2 to #5 (schema, loader, patient list, patient detail with Engagement summary and keyset timeline, dashboard, UI + API, Compose, login and roles, CSV export, request logging, health probes). Run with `DUMP_FILE=$PWD/dump.sql docker compose up --build`; `DUMP_FILE` defaults to `../dump.sql`.
 - **Git**: tickets #2, #3 and #4 are committed. The user commits; don't commit unless asked.
   - Uncommitted: `PROBLEMS.md` (untracked), edits to `NOTES.md`, and all of ticket #5.
