@@ -10,6 +10,10 @@
 <header class="bar">
   <strong>Patient engagement</strong>
   <nav><a th:href="@{/patients}">Patients</a> <a th:href="@{/dashboard}">Dashboard</a></nav>
+  <form class="user" th:if="${currentUser}" method="post" th:action="@{/logout}">
+    <span th:text="${currentUser}">clinician</span>
+    <button type="submit">Sign out</button>
+  </form>
 </header>
 <main>
   <h1>Patient not found</h1>

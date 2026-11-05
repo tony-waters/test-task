@@ -1,23 +1,56 @@
-
+# test-task - Tony Waters
 
 ## How to run the app
+
+> DUMP_FILE=$PWD/dump.sql docker compose up --build
+
+App should be available at:
+
+> http://localhost:8080
+
+use admin/admin or clinician/clinician
+
+### container and local paths
+
+
+
+### prerequisits with versions
+
+### how to load the data
+
+### how to run the tests
 
 To run
 
 > DUMP_FILE=$PWD/dump.sql docker compose up --build
 
-App should be available at:
- 
-> http://localhost:8080
+
+## problems identified in the implementation
+
+## ambiguities in the task
+
+## what I would not ship
 
 ## How I worked
 
 - Used /mattpocock-skills:grill-with-docs pointing at AI_TAKS.md, dump.sql, and TECHNOLOGIES.md (The full transcript is in GRILLING.md). This created the Spec as Issue #1 on GitHub.
 - Used the Spec to create other issues (I asked for 3-4 to keep it manageable).
 - Iterated over each Issue until it was done.
+- ran /codex:review before each code commit
+- ran /security-review occasionally
+- 
 ---
 
 # NOTES:
+
+# Completed Ticket 5
+
+https://github.com/tony-waters/test-task/issues/5
+
+- security review came back clean, and 'improve-codebase-architecture' identified some improvements, dont think i will have time to implement those, but should turn them into tickets - going to stay focused on task for now
+- decided to implement Ticket #5
+- run failed (Claude missed it for some reason)
+- need to update README with suggested details from AI_TASK.md
 
 # Ticket #5?
 

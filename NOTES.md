@@ -9,12 +9,12 @@ Hand-off notes for future agent sessions. This file is about current state and g
 - **Tickets**: sub-issues of #1, all labelled `ready-for-agent`. GitHub's dependency feature records the blocking links.
   - #2 Load the data and browse Patients. **Closed 2026-11-05.** Problems found while building it are in `PROBLEMS.md`.
   - #3 Patient detail and timeline. **Closed 2026-11-05** (commit b3b3e7a). Its findings are PROBLEMS.md #12 to #16.
-  - #4 Dashboard. **Built 2026-11-05, not yet closed.** The user reviews and closes it. Its findings are PROBLEMS.md #17 to #19.
-  - #5 Roles, CSV export and operability (blocked by #2; best done after #3 and #4)
+  - #4 Dashboard. **Closed 2026-11-05** (commit e9d110e). Its findings are PROBLEMS.md #17 to #19.
+  - #5 Roles, CSV export and operability. **Built 2026-11-05, not yet closed.** The user reviews and closes it. Its findings are PROBLEMS.md #20 to #23, plus updates to #7 and #8.
 - **Not ticketed on purpose**: the 100× volume generator, query plans and indexes (spec §11). They sit at the cut line. Search indexing (`pg_trgm`) is also deferred to that work.
-- **Code**: tickets #2, #3 and #4 (schema, loader, patient list, patient detail with Engagement summary and keyset timeline, dashboard, UI + API, Compose). Run with `DUMP_FILE=$PWD/dump.sql docker compose up --build`; `DUMP_FILE` defaults to `../dump.sql`.
-- **Git**: tickets #2 and #3 are committed. The user commits; don't commit unless asked.
-  - Uncommitted: `PROBLEMS.md` (untracked) and edits to `NOTES.md`.
+- **Code**: tickets #2 to #5 (schema, loader, patient list, patient detail with Engagement summary and keyset timeline, dashboard, UI + API, Compose, login and roles, CSV export, request logging, health probes). Run with `DUMP_FILE=$PWD/dump.sql docker compose up --build`; `DUMP_FILE` defaults to `../dump.sql`.
+- **Git**: tickets #2, #3 and #4 are committed. The user commits; don't commit unless asked.
+  - Uncommitted: `PROBLEMS.md` (untracked), edits to `NOTES.md`, and all of ticket #5.
   - Issue #1 links to `GLOSSARY.md` and `docs/adr/`, which don't resolve on GitHub until those files are pushed.
 
 ## Decided in ticket #3
@@ -30,7 +30,18 @@ Hand-off notes for future agent sessions. This file is about current state and g
 - Status buckets, funnel and medians are computed in Java (`StatusCounts`, `Funnel`) from one projection of every Patient's journey timestamps. Weekly active is grouped in SQL (`DashboardQueries.activeByWeek`), and Java fills empty weeks (`WeeklyActive`). The range logic is in `WeeklyActiveQuery`.
 - Weekly-active `from`/`to` are London dates that snap to their ISO weeks. A missing end defaults to the week of the first or last Action, and never makes the range run backwards. The range is capped at 520 weeks: a range the user chose in full that is too wide is a 400, and an end filled in from the data is pulled in to fit (Codex finding, fixed).
 - Medians are reported in whole seconds (`seconds`, `n`). The page shows hours under two days, days after that.
-- At hand-off, 146 tests pass and nothing from #4 is committed.
+- At close, 146 tests pass.
+
+## Decided in ticket #5
+
+- Two filter chains in `security.SecurityConfig`. `/api/**` and `/actuator/**` use HTTP Basic and answer 401/403 as ProblemDetail (`ProblemResponses`, because they happen before MVC). Everything else uses form login. The API chain also accepts the form-login session, so the JSON links and Swagger UI work from the browser. Basic requests don't create sessions.
+- Users: `clinician` (CLINICIAN) and `admin` (ADMIN only, which the rules treat as a superset). Passwords from `CLINICIAN_PASSWORD` / `ADMIN_PASSWORD`, local defaults `clinician` / `admin`. Export and all Actuator endpoints except health are ADMIN.
+- **Tests run as a signed-in CLINICIAN by default**: `@IntegrationTest` carries `@WithMockUser`. Override per class or method, or use `httpBasic(...)` / `anonymous()`. `SecurityTest` uses the real credentials.
+- Logging is Spring Boot structured logging (`logging.structured.format.console: logstash`), so *every* log line is JSON, including the loader's. `RequestLogFilter` writes the request line; the request ID is in the MDC. The role is captured by `RoleCaptureFilter` inside each chain, because the security context is cleared before the outer filter logs. The endpoint is the MVC route pattern; the Patient UUID is a separate `patient` field.
+- Export: `PatientExport` (read-only transaction, audit line on logger `uk.bit1.engagement.audit`) over `PatientSearch.stream`, a `getResultStream()` with Hibernate's fetch-size hint (`app.export.fetch-size`, default 500). `PatientExportTest.readsThroughADatabaseCursor` proves the cursor via `pg_cursors`; it was confirmed to fail with the hint removed. CSV times are London local with offset; formula-like values get a leading apostrophe.
+- Checked on the real dump (new build on port 8081 against the Compose database): export 100 rows, `status=REGISTERED` 80. 421 identifier values from the export were searched for in the app log: none found.
+- **Load mode has no web server**, so anything web-only must be `@ConditionalOnWebApplication`. `SecurityConfig` wasn't at first, and the Compose loader failed to start (no `HttpSecurity` bean). Every other integration test starts the web app, so `LoadModeTest` now starts the app the way the loader does.
+- At hand-off, 175 tests pass and nothing from #5 is committed. `DUMP_FILE=$PWD/dump.sql docker compose up -d --build` was checked after the fix: the loader exits 0 (100 / 3,183 inserted), readiness is UP, 3 / 80 / 17, clinician export 403, admin export 100 rows.
 
 ## Rules that are easy to break
 

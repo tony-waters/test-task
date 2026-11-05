@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
+import org.hibernate.jpa.HibernateHints;
 import uk.bit1.engagement.London;
 
 /**
@@ -53,9 +55,7 @@ class PatientSearchImpl implements PatientSearch {
     long offset = (long) query.page() * query.size();
     List<PatientSummary> content = List.of();
     if (offset < total) {
-      String orderBy = " order by " + query.sort().orderBy(query.direction()) + ", p.id asc";
-      TypedQuery<Object[]> rows = em.createQuery(SELECT + where + orderBy, Object[].class);
-      params.forEach(rows::setParameter);
+      TypedQuery<Object[]> rows = rowsQuery(query, where, params);
       rows.setFirstResult((int) offset); // offset < total, and a count fits an int here
       rows.setMaxResults(query.size());
       LocalDate today = London.today(clock);
@@ -70,6 +70,29 @@ class PatientSearchImpl implements PatientSearch {
         totalPages,
         query.sort().param(),
         query.direction().param());
+  }
+
+  /**
+   * Every matching row, in list order, read through a database cursor {@code fetchSize} rows at a
+   * time. The caller must close the stream, inside a transaction: PostgreSQL only uses a cursor
+   * when auto-commit is off.
+   */
+  @Override
+  public Stream<PatientSummary> stream(PatientListQuery query, int fetchSize) {
+    Map<String, Object> params = new HashMap<>();
+    TypedQuery<Object[]> rows = rowsQuery(query, where(query, params), params);
+    rows.setHint(HibernateHints.HINT_FETCH_SIZE, fetchSize);
+    rows.setHint(HibernateHints.HINT_READ_ONLY, true);
+    LocalDate today = London.today(clock);
+    return rows.getResultStream().map(r -> toSummary(r, today));
+  }
+
+  private TypedQuery<Object[]> rowsQuery(
+      PatientListQuery query, String where, Map<String, Object> params) {
+    String orderBy = " order by " + query.sort().orderBy(query.direction()) + ", p.id asc";
+    TypedQuery<Object[]> rows = em.createQuery(SELECT + where + orderBy, Object[].class);
+    params.forEach(rows::setParameter);
+    return rows;
   }
 
   private static String where(PatientListQuery query, Map<String, Object> params) {

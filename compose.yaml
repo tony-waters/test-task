@@ -1,7 +1,8 @@
 # docker compose up
 #
 # Starts PostgreSQL 18, runs the loader once against the dump, then starts the app
-# on http://localhost:8080.
+# on http://localhost:8080. Sign in as clinician/clinician or admin/admin unless
+# CLINICIAN_PASSWORD and ADMIN_PASSWORD say otherwise.
 #
 # The dump stays outside the repository. By default it is read from ../dump.sql;
 # point DUMP_FILE at it to use another path:
@@ -49,7 +50,11 @@ services:
     # made the dependency download flaky.
     image: patient-engagement:local
     pull_policy: never
-    environment: *app-env
+    environment:
+      <<: *app-env
+      # Local defaults. Set real passwords anywhere the app is reachable by others.
+      CLINICIAN_PASSWORD: ${CLINICIAN_PASSWORD:-clinician}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
     ports:
       - "8080:8080"
     depends_on:

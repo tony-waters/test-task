@@ -96,3 +96,5 @@ p.empty { color: var(--muted); padding: 1rem 0; }
   .medians { grid-template-columns: 1fr; }
   .medians dd { margin-bottom: .5rem; }
 }
+.bar .user { margin-left: auto; display: flex; gap: .75rem; align-items: center; }
+.bar .user button { background: transparent; color: #fff; border: 1px solid #fff; padding: .15rem .6rem; cursor: pointer; }

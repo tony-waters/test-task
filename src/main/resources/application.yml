@@ -30,3 +30,33 @@ logging:
     # Never log SQL parameters: they would carry patient data.
     org.hibernate.SQL: warn
     org.hibernate.orm.jdbc.bind: warn
+  structured:
+    format:
+      # One JSON object per line. Request lines and the export audit line add their fields.
+      console: logstash
+
+app:
+  security:
+    # Local defaults only. Set CLINICIAN_PASSWORD and ADMIN_PASSWORD anywhere else.
+    clinician-password: ${CLINICIAN_PASSWORD:clinician}
+    admin-password: ${ADMIN_PASSWORD:admin}
+  export:
+    # Rows per round trip of the export's database cursor.
+    fetch-size: 500
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      # /actuator/health/liveness and /actuator/health/readiness. Readiness includes the database.
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState, db
+      # Health is public, so only signed-in admins see component details.
+      show-details: when-authorized
+      roles: ADMIN

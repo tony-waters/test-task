@@ -10,6 +10,10 @@
 <header class="bar">
   <strong>Patient engagement</strong>
   <nav><a th:href="@{/patients}">Patients</a> <a th:href="@{/dashboard}">Dashboard</a></nav>
+  <form class="user" th:if="${currentUser}" method="post" th:action="@{/logout}">
+    <span th:text="${currentUser}">clinician</span>
+    <button type="submit">Sign out</button>
+  </form>
 </header>
 
 <main>
@@ -115,6 +119,11 @@
     </th:block>
     <a th:if="${view.hasNext()}" th:href="${view.pageUrl(view.result().page() + 1)}">Next</a>
   </nav>
+
+  <p class="export" th:if="${canExport}">
+    <a th:href="${view.exportUrl()}" download>Download this list as CSV</a>
+    (every matching patient, all pages, with identifiers)
+  </p>
 
   <p class="api">Same list as JSON: <a th:href="@{/api/patients}">/api/patients</a> ·
     <a th:href="@{/swagger-ui.html}">API docs</a></p>

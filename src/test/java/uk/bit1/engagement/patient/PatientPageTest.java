@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.bit1.engagement.importer.DumpLoader;
 import uk.bit1.engagement.support.IntegrationTest;
@@ -65,5 +66,26 @@ class PatientPageTest {
     mvc.perform(get("/patients").param("size", "7"))
         .andExpect(status().isBadRequest())
         .andExpect(content().string(containsString("must be one of 10, 25, 50, 100")));
+  }
+
+  @Test
+  void showsWhoIsSignedInWithASignOutForm() throws Exception {
+    mvc.perform(get("/patients"))
+        .andExpect(content().string(containsString("action=\"/logout\"")))
+        .andExpect(content().string(containsString(">clinician<")))
+        .andExpect(content().string(containsString("name=\"_csrf\"")));
+  }
+
+  @Test
+  void onlyAdminsSeeTheExportLink() throws Exception {
+    mvc.perform(get("/patients").param("status", "REGISTERED"))
+        .andExpect(content().string(not(containsString("export.csv"))));
+  }
+
+  @Test
+  @WithMockUser(username = "admin", roles = "ADMIN")
+  void theExportLinkKeepsTheFiltersAndSortButNotThePage() throws Exception {
+    mvc.perform(get("/patients").param("status", "REGISTERED").param("size", "10").param("page", "1"))
+        .andExpect(content().string(containsString("href=\"/api/patients/export.csv?status=REGISTERED\"")));
   }
 }
