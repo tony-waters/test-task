@@ -1,3 +1,5 @@
+Read `NOTES.md` first. It covers current state, hand-off notes and repo rules that are easy to break (README authorship, banned names, never committing the brief or the dump).
+
 ## Agent skills
 
 ### Issue tracker

@@ -1,4 +1,16 @@
 
+# Create tickets
+
+Created 4 tickets:
+https://github.com/tony-waters/test-task/issues/2
+https://github.com/tony-waters/test-task/issues/3
+https://github.com/tony-waters/test-task/issues/4
+https://github.com/tony-waters/test-task/issues/5
+
+Going to clear the session now and start work on the first actual ticket,
+
+---
+
 # Create a Spec
 
 A spec is useful if I want to create tickets - which is itself useful when controlling agent context (i.e. can /clear context after each ticket.)
