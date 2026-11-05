@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+  <link rel="stylesheet" th:href="@{/app.css}">
+</head>
+<body th:with="s=${overview.status()}, f=${overview.funnel()}">
+<header class="bar">
+  <strong>Patient engagement</strong>
+  <nav><a th:href="@{/patients}">Patients</a> <a th:href="@{/dashboard}" aria-current="page">Dashboard</a></nav>
+</header>
+
+<main>
+  <h1>Dashboard</h1>
+  <p class="summary">All <span th:text="${s.total()}">100</span> patients. Filters on the patient list do not apply here.</p>
+
+  <div class="errors" th:if="${errors}" role="alert">
+    <p>The date range was not valid, so the default range is shown.</p>
+    <ul>
+      <li th:each="e : ${errors}"><code th:text="${e.parameter()}">param</code> <span th:text="${e.message()}">message</span></li>
+    </ul>
+  </div>
+
+  <section aria-labelledby="status-heading">
+    <h2 id="status-heading">Patients by current status</h2>
+    <div class="tiles">
+      <div class="tile">
+        <span class="tile-label"><span class="swatch invited"></span>Invited</span>
+        <span class="tile-value" th:text="${s.invited()}">3</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label"><span class="swatch registered"></span>Registered</span>
+        <span class="tile-value" th:text="${s.registered()}">80</span>
+      </div>
+      <div class="tile">
+        <span class="tile-label"><span class="swatch discharged"></span>Discharged</span>
+        <span class="tile-value" th:text="${s.discharged()}">17</span>
+      </div>
+    </div>
+    <p class="note">Current status: each patient is counted once, at the latest stage they have reached.</p>
+  </section>
+
+  <section aria-labelledby="funnel-heading">
+    <h2 id="funnel-heading">Funnel</h2>
+    <div class="table-wrap">
+    <table class="funnel">
+      <thead>
+      <tr><th>Stage reached</th><th class="num">Patients</th><th class="num">Conversion</th><th class="bar-col"><span class="visually-hidden">Share of invited</span></th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <th>Invited</th>
+        <td class="num" th:text="${f.invited()}">100</td>
+        <td class="num">–</td>
+        <td class="bar-col"><span class="hbar" th:style="'width:' + (${f.invited() > 0} ? 100 : 0) + '%'"></span></td>
+      </tr>
+      <tr>
+        <th>Registered</th>
+        <td class="num" th:text="${f.registered()}">96</td>
+        <td class="num" th:text="${@fmt.percent(f.invitedToRegistered())}">96%</td>
+        <td class="bar-col"><span class="hbar" th:style="'width:' + (${f.invited() > 0} ? ${f.registered() * 100.0 / f.invited()} : 0) + '%'"></span></td>
+      </tr>
+      <tr>
+        <th>Discharged<sup th:if="${f.skippedRegistration() > 0}"><a href="#skipped-note">*</a></sup></th>
+        <td class="num" th:text="${f.discharged()}">16</td>
+        <td class="num" th:text="${@fmt.percent(f.registeredToDischarged())}">17%</td>
+        <td class="bar-col"><span class="hbar" th:style="'width:' + (${f.invited() > 0} ? ${f.discharged() * 100.0 / f.invited()} : 0) + '%'"></span></td>
+      </tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="note">Strict progression: a stage counts only patients who also reached the stage before it. Conversion is the share of the previous stage.</p>
+    <p class="note" id="skipped-note" th:if="${f.skippedRegistration() > 0}">
+      * <span th:text="${f.skippedRegistration()}">1</span>
+      <span th:text="${f.skippedRegistration() == 1} ? 'patient was' : 'patients were'">patient was</span>
+      discharged without registering (skipped registration). They are left out of Discharged here, but still counted as Discharged in the current-status figures.
+    </p>
+
+    <dl class="medians">
+      <dt>Median time from Invitation to Registration</dt>
+      <dd><span th:text="${@fmt.duration(f.invitedToRegisteredTime().seconds())}">2.0 days</span>
+        <span class="n">(n = <span th:text="${f.invitedToRegisteredTime().n()}">96</span>)</span></dd>
+      <dt>Median time from Registration to Discharge</dt>
+      <dd><span th:text="${@fmt.duration(f.registeredToDischargedTime().seconds())}">90.0 days</span>
+        <span class="n">(n = <span th:text="${f.registeredToDischargedTime().n()}">16</span>)</span></dd>
+    </dl>
+    <p class="note">Medians count only patients who completed that step. Patients still waiting are left out, so real waits are likely longer.</p>
+  </section>
+
+  <section aria-labelledby="weekly-heading">
+    <h2 id="weekly-heading">Weekly active patients</h2>
+    <p class="note">Patients who recorded at least one Action in each week (Monday to Sunday, UK time). Actions after Discharge and suspect timestamps are counted.</p>
+
+    <form class="filters" method="get" th:action="@{/dashboard}">
+      <label>From <input type="date" name="from" th:value="${query.from() ?: weekly.from()}"></label>
+      <label>To <input type="date" name="to" th:value="${query.to() ?: weekly.to()}"></label>
+      <div class="actions">
+        <button type="submit">Show</button>
+        <a th:href="@{/dashboard}">Reset to all Actions</a>
+      </div>
+    </form>
+
+    <p class="empty" th:if="${weekly.weeks().isEmpty()}">No Actions have been recorded.</p>
+
+    <figure class="weekly" th:unless="${weekly.weeks().isEmpty()}"
+            th:with="peak=${weekly.peak()}, step=${weekly.weeks().size() / 12 + 1}">
+      <div class="chart" role="img" aria-label="Weekly active patients. The same figures are in the table below.">
+        <div class="y-axis" aria-hidden="true"><span th:text="${peak}">40</span><span>0</span></div>
+        <div class="plot">
+          <div class="col" th:each="w, it : ${weekly.weeks()}">
+            <span class="tip" th:text="${@fmt.week(w.isoWeek(), w.weekStart(), w.activePatients())}">2025-W10 · week of 3 Mar 2025: 2 patients</span>
+            <span class="vbar" th:if="${w.activePatients() > 0}"
+                  th:style="'height:' + ${w.activePatients() * 100.0 / peak} + '%'"></span>
+            <span class="x-label" aria-hidden="true" th:if="${it.index % step == 0 or it.last}"
+                  th:classappend="${(it.index % step != 0 ? 'narrow-only ' : '') + (it.first or it.last ? '' : 'mid')}"
+                  th:text="${@fmt.day(w.weekStart())}">3 Mar 2025</span>
+          </div>
+        </div>
+      </div>
+      <figcaption>Week starting (Monday)</figcaption>
+    </figure>
+
+    <details th:unless="${weekly.weeks().isEmpty()}">
+      <summary>Show as a table</summary>
+      <div class="table-wrap">
+      <table class="weekly-table">
+        <thead><tr><th>ISO week</th><th>Week starting</th><th class="num">Active patients</th></tr></thead>
+        <tbody>
+        <tr th:each="w : ${weekly.weeks()}">
+          <td th:text="${w.isoWeek()}">2025-W10</td>
+          <td th:text="${@fmt.day(w.weekStart())}">3 Mar 2025</td>
+          <td class="num" th:text="${w.activePatients()}">12</td>
+        </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <p class="api">Same figures as JSON:
+    <a th:href="@{/api/dashboard/status}">status</a> ·
+    <a th:href="@{/api/dashboard/funnel}">funnel</a> ·
+    <a th:href="@{/api/dashboard/weekly-active(from=${query.from()},to=${query.to()})}">weekly active</a> ·
+    <a th:href="@{/swagger-ui.html}">API docs</a></p>
+</main>
+</body>
+</html>

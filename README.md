@@ -19,11 +19,18 @@ App should be available at:
 
 # NOTES:
 
+# Completed ticket #4
+
+https://github.com/tony-waters/test-task/issues/4
+
+- UI looks functional (localhost:8080)
+- would like to pause here and do some other checks
+- looks like I am three quarters done
+
 # Completed ticket #3
 
 https://github.com/tony-waters/test-task/issues/3
 
-- Claude included fully qualified imports in the code, rather than importing them (e.g. in ActionRepositort - select new uk.bit1.engagement.action.EngagementRow) - leaving for now.
 - Suspect timestamps found - very near each other.
 - ran a /codex:review
 - checked the code manually, though at this point it is hard to manually review all the code quickly.
