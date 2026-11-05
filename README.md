@@ -2,6 +2,8 @@
 
 ## How to run the app
 
+### container path
+
 > DUMP_FILE=$PWD/dump.sql docker compose up --build
 
 App should be available at:
@@ -10,26 +12,52 @@ App should be available at:
 
 use admin/admin or clinician/clinician
 
-### container and local paths
+### local path
 
+You need a PostgresSql running at localhost:5432 - passwords all `engagement`:
 
+> docker compose up -d db
+
+Then:
+
+> ./mvnw spring-boot:run -Dspring-boot.run.arguments=--app.load.file=$PWD/dump.sql
+
+from the project root.
 
 ### prerequisits with versions
 
-### how to load the data
+- Spring Boot 4.x
+- Flyway 12.4.0
+- PostgresSQL JDBC Driver 42.7.14
+- springdoc-openapi 3.0.2
+- Testcontainers 2.0.5
+
+### how to load test the data
+
+N/A - did not complete
 
 ### how to run the tests
 
-To run
-
-> DUMP_FILE=$PWD/dump.sql docker compose up --build
-
+> ./mvnw clean test
 
 ## problems identified in the implementation
 
+- no indexes on DB yet (performance)
+    - ok for 100 patients, but not good in real world quantities
+- CSV export holds DB connection for complete download, and no greyed out button so user could click it again (performance)
+  - experienced this myself in prod. users often click the button again, also more than one user may be online using it - cache? 
+- NHS numbers and names may be left in browser history as they travel in the URL (security)
+- Duploicate UUIDs cause dump to fail
+
+Ran out of time here - can discuss the above in more detail.
+
 ## ambiguities in the task
 
+- I struggled with the domain being ill defined. See `## Issues and choices` below
+
 ## what I would not ship
+
+- some of this is purposefully 'prototype' - like passwords hard coded in Java code.
 
 ## How I worked
 
