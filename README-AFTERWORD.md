@@ -1,4 +1,4 @@
-# afterword - not committed - done after test
+# afterword - ~~not committed~~ - done after test
 
 ## NOTES:
 
