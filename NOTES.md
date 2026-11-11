@@ -13,6 +13,14 @@ Hand-off notes for future agent sessions. This file is about current state and g
   - #5 Roles, CSV export and operability. **Closed 2026-11-05**, before being committed. Its findings are PROBLEMS.md #20 to #23, plus updates to #7 and #8.
   - #6 Volume: 100× generator, query plans and indexes (spec §11, the cut line). Created 2026-11-05, `ready-for-agent`, not blocked. It also carries the `pg_trgm` decision, the suspect-timestamp threshold scans, and the export's connection hold (PROBLEMS.md #3, #4, #13, #14, #17, #18, #20).
   - #8 Restructure packages by use case (ADR 0003). Created 2026-11-11. **Implemented on branch `package-by-use-case` (23a1a4f), deliberately not merged**: the user is trying a different approach on `main` first. Don't redo #8 here. That branch's `NOTES.md` has its "Decided in ticket #8" section. If the other approach wins, record it in a new ADR that supersedes 0003. The issue stays open. The pre-refactor code is preserved on branch `v1-original`.
+  - **Alternative being tried on `main` (2026-11-11, uncommitted)**: layers then aggregate then kind, modelled on the user's other Spring Boot project. This is the option ADR 0003 rejected.
+    - `domain/{common,patient,action}` holds entities, enums, domain rules (`Status`, `Age`, `SuspectTimestamps`), `London` and entity-only repositories.
+    - `application/{common,patient,dashboard,export}` holds `*QueryService`s, the CSV export (`application/export`: `PatientExport`, `PatientCsv`; it reads through `PatientQueryService.stream`, never a repository), `PatientQueryRepository` (with the `PatientSearch` fragment, the Engagement and timeline queries), and read models plus query objects under `query/`. `application/common` holds the request-error types that used to sit in `web`.
+    - `web/{patient,dashboard}` holds controllers, `PatientRequest` and `PatientListView`. `web/` keeps the cross-cutting pieces. `importer` and `security` are unchanged.
+    - Commands go in `application/<aggregate>/command` when they arrive.
+    - Data access goes through Spring Data repositories (user preference, 2026-11-11). `DashboardQueries` became `application.dashboard.DashboardQueryRepository`. The extraction-start query moved from `SuspectTimestamps` to `PatientQueryRepository.extractionStarted()`, which leaves `SuspectTimestamps` a pure domain rule with no `EntityManager`. Only `DumpLoader` still uses `JdbcTemplate`, for its `on conflict` upsert.
+    - Dependencies point domain ← application ← web. There is no ArchUnit test for it yet.
+    - The comment in `V1__…sql` still names `patient.Status`. It is left as it is because editing an applied migration changes its Flyway checksum.
   - #7 Hardening. Created 2026-11-05, `ready-for-agent`, not blocked. Covers PROBLEMS.md #6, #7, #8, #11, #15 and #22: Compose DB port and default passwords, search terms in URLs (needs a decision against GRILLING Q19/Q21), unmatched-path log redaction, the timeline cursor's internal id, duplicate UUIDs in a dump, and an opt-in test against the real dump.
 - **Code**: tickets #2 to #5 (schema, loader, patient list, patient detail with Engagement summary and keyset timeline, dashboard, UI + API, Compose, login and roles, CSV export, request logging, health probes). Run with `DUMP_FILE=$PWD/dump.sql docker compose up --build`; `DUMP_FILE` defaults to `../dump.sql`.
 - **Git**: tickets #2, #3 and #4 are committed. The user commits; don't commit unless asked.
@@ -21,15 +29,15 @@ Hand-off notes for future agent sessions. This file is about current state and g
 
 ## Decided in ticket #3
 
-- **Suspect timestamp rule** (user, 2026-11-05): recorded at, or within 1 s before, the moment extraction *began*, which is the earliest `source_created_at` in either table. That flags 47 on the dump. It is not each row's own `entity_created`, and not the latest one, which would flag 17. The code is `action.SuspectTimestamps`.
-- The PatientRepository / `PatientSearch` fragment refactor carried over from #2 is done. `PatientListService` is gone, and `PatientService` is the shared service.
+- **Suspect timestamp rule** (user, 2026-11-05): recorded at, or within 1 s before, the moment extraction *began*, which is the earliest `source_created_at` in either table. That flags 47 on the dump. It is not each row's own `entity_created`, and not the latest one, which would flag 17. The code is `domain.action.SuspectTimestamps`.
+- The PatientRepository / `PatientSearch` fragment refactor carried over from #2 is done. `PatientListService` is gone, and `PatientService` (now `application.patient.PatientQueryService`) is the shared service.
 - JPQL constructor expressions keep the fully qualified class name (`select new uk.bit1...EngagementRow(...)`). The user tried Spring Data's implicit DTO rewrite and chose to keep the explicit form.
 - A Codex review of #3 found two things. Unfamiliar Action types had no column on the detail page: fixed with `EngagementSummary.columnActionTypes()`. A screenshot showing real dump data was removed and never committed. Any future screenshot must use synthetic data.
 - At close, 105 tests pass.
 
 ## Decided in ticket #4
 
-- Status buckets, funnel and medians are computed in Java (`StatusCounts`, `Funnel`) from one projection of every Patient's journey timestamps. Weekly active is grouped in SQL (`DashboardQueries.activeByWeek`), and Java fills empty weeks (`WeeklyActive`). The range logic is in `WeeklyActiveQuery`.
+- Status buckets, funnel and medians are computed in Java (`StatusCounts`, `Funnel`) from one projection of every Patient's journey timestamps. Weekly active is grouped in SQL (`DashboardQueryRepository.activeByWeek`, was `DashboardQueries`), and Java fills empty weeks (`WeeklyActive`). The range logic is in `WeeklyActiveQuery`.
 - Weekly-active `from`/`to` are London dates that snap to their ISO weeks. A missing end defaults to the week of the first or last Action, and never makes the range run backwards. The range is capped at 520 weeks: a range the user chose in full that is too wide is a 400, and an end filled in from the data is pulled in to fit (Codex finding, fixed).
 - Medians are reported in whole seconds (`seconds`, `n`). The page shows hours under two days, days after that.
 - At close, 146 tests pass.

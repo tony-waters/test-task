@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import org.springframework.stereotype.Component;
-import uk.bit1.engagement.London;
+import uk.bit1.engagement.domain.common.London;
 
 /**
  * Formats values for pages, in London time and UK English whatever the server locale. Used from

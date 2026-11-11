@@ -2,9 +2,10 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "deny": [
-      "Bash(git push:*)"
     ],
     "ask": [
+    ],
+    "allow": [
       "Read(./.env)",
       "Read(./.env.*)",
       "Read(./**/application-prod.*)",
@@ -17,9 +18,9 @@
       "Read(./**/*.keystore)",
       "Bash(curl:*)",
       "Bash(wget:*)",
-      "Bash(git:*)"
-    ],
-    "allow": [
+      "Bash(git:*)",
+      "Bash(git push:*)",
+
       "Bash(git commit:*)",
       "Bash(gh pr merge:*)",
       "Bash(docker:*)",

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.bit1.engagement.patient.Status;
+import uk.bit1.engagement.domain.patient.Status;
 import uk.bit1.engagement.support.IntegrationTest;
 import uk.bit1.engagement.support.StandardData;
 import uk.bit1.engagement.support.TestDump;

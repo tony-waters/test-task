@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import uk.bit1.engagement.application.common.InvalidParametersException;
+import uk.bit1.engagement.application.common.NotFoundException;
 
 /**
  * Renders API errors as RFC 9457 ProblemDetail. Validation failures carry an {@code errors} array
