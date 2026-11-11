@@ -8,8 +8,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import uk.bit1.engagement.dashboard.WeeklyActiveQuery.DateSpan;
 import uk.bit1.engagement.dashboard.WeeklyActiveQuery.WeekRange;
-import uk.bit1.engagement.web.InvalidParametersException;
-import uk.bit1.engagement.web.ParameterError;
+import uk.bit1.engagement.shared.InvalidParametersException;
+import uk.bit1.engagement.shared.ParameterError;
 
 class WeeklyActiveQueryTest {
 

@@ -1,7 +1,7 @@
 package uk.bit1.engagement.dashboard;
 
 import java.util.Collection;
-import uk.bit1.engagement.patient.Status;
+import uk.bit1.engagement.core.Status;
 
 /**
  * How many Patients are at each current Status. The buckets are mutually exclusive and add up to

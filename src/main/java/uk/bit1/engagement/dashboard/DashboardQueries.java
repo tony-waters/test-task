@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Component;
-import uk.bit1.engagement.London;
 import uk.bit1.engagement.dashboard.WeeklyActiveQuery.DateSpan;
 import uk.bit1.engagement.dashboard.WeeklyActiveQuery.WeekRange;
+import uk.bit1.engagement.shared.London;
 
 /**
  * The dashboard's reads, each one statement over the whole population.

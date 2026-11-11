@@ -1,7 +1,7 @@
 package uk.bit1.engagement.dashboard;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -22,8 +22,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.bit1.engagement.importer.DumpLoader;
 import uk.bit1.engagement.support.IntegrationTest;
-import uk.bit1.engagement.support.TestDump;
 import uk.bit1.engagement.support.TestDump.PatientRow;
+import uk.bit1.engagement.support.TestDump;
 
 /**
  * The dashboard on a synthetic population with the supplied data's shape: 100 Patients, of whom 3

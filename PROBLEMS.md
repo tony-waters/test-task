@@ -117,7 +117,7 @@ Current state: tickets #2 (load data, browse Patients), #3 (patient detail and t
 
 ## 14. The timeline has no index on its keyset (performance)
 
-- **Where**: `ActionRepository.newest` / `olderThan`: `where patient_id = ? and (recorded_at, id) < (?, ?) order by recorded_at desc, id desc limit 51`.
+- **Where**: `TimelineActions.newest` / `olderThan` (was `ActionRepository`): `where patient_id = ? and (recorded_at, id) < (?, ?) order by recorded_at desc, id desc limit 51`.
 - **What**: this is the same missing `action (patient_id, recorded_at)` index as #3. Keyset paging was chosen (GRILLING Q31) so deep pages stay as cheap as the first one, but without the index every page sorts the Patient's Actions after a full table scan. So the paging design brings no benefit yet.
 - **Cost**: as #3. The fix is the index `action (patient_id, recorded_at desc, id desc)`, which serves the timeline, the last-Action subquery and the Engagement summary.
 - **Status**: left, with #3, for the volume work.

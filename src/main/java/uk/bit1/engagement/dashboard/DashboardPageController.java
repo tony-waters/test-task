@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import uk.bit1.engagement.web.InvalidParametersException;
+import uk.bit1.engagement.shared.InvalidParametersException;
 
 /** The dashboard page. The weekly-active range is the only state, and it is in the URL. */
 @Controller

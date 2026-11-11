@@ -6,9 +6,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import uk.bit1.engagement.London;
-import uk.bit1.engagement.web.InvalidParametersException;
-import uk.bit1.engagement.web.ParameterError;
+import uk.bit1.engagement.shared.InvalidParametersException;
+import uk.bit1.engagement.shared.London;
+import uk.bit1.engagement.shared.ParameterError;
 
 /**
  * A validated weekly-active request. The series covers every London ISO week from the one holding

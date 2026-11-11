@@ -6,9 +6,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
-import uk.bit1.engagement.London;
 import uk.bit1.engagement.dashboard.WeeklyActive.Week;
 import uk.bit1.engagement.dashboard.WeeklyActiveQuery.WeekRange;
+import uk.bit1.engagement.shared.London;
 
 class WeeklyActiveTest {
 
