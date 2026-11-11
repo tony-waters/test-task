@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import org.springframework.stereotype.Component;
-import uk.bit1.engagement.domain.common.London;
+import uk.bit1.engagement.application.common.DisplayZone;
 
 /**
  * Formats values for pages, in London time and UK English whatever the server locale. Used from
@@ -15,11 +15,11 @@ import uk.bit1.engagement.domain.common.London;
 public class DisplayFormat {
 
   private static final DateTimeFormatter DATE_TIME =
-      DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.UK).withZone(London.ZONE);
+      DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", Locale.UK).withZone(DisplayZone.ZONE);
   private static final DateTimeFormatter DATE =
-      DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK).withZone(London.ZONE);
+      DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK).withZone(DisplayZone.ZONE);
   private static final DateTimeFormatter SECONDS =
-      DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm:ss", Locale.UK).withZone(London.ZONE);
+      DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm:ss", Locale.UK).withZone(DisplayZone.ZONE);
   private static final DateTimeFormatter CALENDAR_DATE =
       DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK);
 

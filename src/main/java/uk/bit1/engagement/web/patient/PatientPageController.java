@@ -13,8 +13,6 @@ import uk.bit1.engagement.application.common.NotFoundException;
 import uk.bit1.engagement.application.patient.PatientQueryService;
 import uk.bit1.engagement.application.patient.query.PatientDetail;
 import uk.bit1.engagement.application.patient.query.PatientListQuery;
-import uk.bit1.engagement.domain.action.Module;
-import uk.bit1.engagement.domain.patient.Status;
 
 /** The patient list and detail pages. All filter, sort and page state is in the URL. */
 @Controller
@@ -48,8 +46,8 @@ class PatientPageController {
       query = PatientListQuery.defaults();
     }
     model.addAttribute("view", new PatientListView(query, patients.find(query)));
-    model.addAttribute("statuses", Status.values());
-    model.addAttribute("modules", Module.values());
+    model.addAttribute("statuses", PatientListQuery.STATUSES);
+    model.addAttribute("modules", PatientListQuery.MODULES);
     model.addAttribute("pageSizes", PatientListQuery.PAGE_SIZES);
     return "patients/list";
   }

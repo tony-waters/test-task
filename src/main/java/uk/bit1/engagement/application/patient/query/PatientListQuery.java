@@ -36,6 +36,12 @@ public record PatientListQuery(
     int size) {
 
   public static final List<Integer> PAGE_SIZES = List.of(10, 25, 50, 100);
+
+  /** The statuses the list can filter by, in display order. */
+  public static final List<Status> STATUSES = List.of(Status.values());
+
+  /** The Modules the list can filter by, in display order. */
+  public static final List<Module> MODULES = List.of(Module.values());
   public static final int DEFAULT_SIZE = 25;
   public static final int MAX_SEARCH_LENGTH = 200;
 
